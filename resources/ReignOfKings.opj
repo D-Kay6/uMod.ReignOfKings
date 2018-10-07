@@ -1446,7 +1446,7 @@
               {
                 "OpCode": "ldc_i4",
                 "OpType": "Int32",
-                "Operand": "39"
+                "Operand": "41"
               },
               {
                 "OpCode": "beq_s",
@@ -1466,7 +1466,7 @@
               {
                 "OpCode": "ldc_i4",
                 "OpType": "Int32",
-                "Operand": "39"
+                "Operand": "41"
               },
               {
                 "OpCode": "call",
@@ -1490,112 +1490,6 @@
             },
             "MSILHash": "nKss1i5/JvKpqtutTsbF8Wq2BZKwvwLeulzIJiVK5T8=",
             "BaseHookName": null,
-            "HookCategory": "_Patch"
-          }
-        },
-        {
-          "Type": "Modify",
-          "Hook": {
-            "InjectionIndex": 0,
-            "RemoveCount": 0,
-            "Instructions": [
-              {
-                "OpCode": "ldarg_0",
-                "OpType": "None",
-                "Operand": null
-              },
-              {
-                "OpCode": "ldfld",
-                "OpType": "Field",
-                "Operand": "Assembly-CSharp|FileCounter|FolderLocationFromDataPath"
-              },
-              {
-                "OpCode": "ldstr",
-                "OpType": "String",
-                "Operand": "/../"
-              },
-              {
-                "OpCode": "callvirt",
-                "OpType": "Method",
-                "Operand": "mscorlib|System.String|Equals(System.String)"
-              },
-              {
-                "OpCode": "brfalse_s",
-                "OpType": "Instruction",
-                "Operand": 0
-              },
-              {
-                "OpCode": "ldarg_0",
-                "OpType": "None",
-                "Operand": null
-              },
-              {
-                "OpCode": "call",
-                "OpType": "Method",
-                "Operand": "Assembly-CSharp|FileCounter|get_Folders"
-              },
-              {
-                "OpCode": "ldlen",
-                "OpType": "None",
-                "Operand": null
-              },
-              {
-                "OpCode": "conv_i4",
-                "OpType": "None",
-                "Operand": null
-              },
-              {
-                "OpCode": "ldc_i4_2",
-                "OpType": "None",
-                "Operand": null
-              },
-              {
-                "OpCode": "beq_s",
-                "OpType": "Instruction",
-                "Operand": 0
-              },
-              {
-                "OpCode": "ldarg_0",
-                "OpType": "None",
-                "Operand": null
-              },
-              {
-                "OpCode": "ldflda",
-                "OpType": "Field",
-                "Operand": "Assembly-CSharp|FileCounter|_folders"
-              },
-              {
-                "OpCode": "ldc_i4_2",
-                "OpType": "None",
-                "Operand": null
-              },
-              {
-                "OpCode": "call",
-                "OpType": "Method",
-                "Operand": "mscorlib|System.Array|Resize[System.String]"
-              },
-              {
-                "OpCode": "br_s",
-                "OpType": "Instruction",
-                "Operand": 0
-              }
-            ],
-            "HookTypeName": "Modify",
-            "Name": "RecountFoldersRoot [patch]",
-            "HookName": "RecountFoldersRoot",
-            "AssemblyName": "Assembly-CSharp.dll",
-            "TypeName": "FileCounter",
-            "Flagged": false,
-            "Signature": {
-              "Exposure": 2,
-              "Name": "CountFolder",
-              "ReturnType": "System.UInt32",
-              "Parameters": [
-                "System.UInt32"
-              ]
-            },
-            "MSILHash": "nKss1i5/JvKpqtutTsbF8Wq2BZKwvwLeulzIJiVK5T8=",
-            "BaseHookName": "RecountFoldersManaged [patch]",
             "HookCategory": "_Patch"
           }
         }
