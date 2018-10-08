@@ -3,7 +3,7 @@ cls
 :start
 echo Starting server...
 
-ROK.exe -batchmode -nographics -silentcrash
+ROK.exe -batchmode -nographics -silent-crashes
 
 echo.
 echo Restarting server...
