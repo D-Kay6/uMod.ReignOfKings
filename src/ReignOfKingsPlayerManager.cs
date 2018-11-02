@@ -1,14 +1,13 @@
 ﻿extern alias References;
 
 using CodeHatch.Engine.Networking;
-using Oxide.Core;
-using Oxide.Core.Libraries.Covalence;
 using References::ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using uMod.Libraries.Universal;
 
-namespace Oxide.Game.ReignOfKings.Libraries.Covalence
+namespace uMod.ReignOfKings
 {
     /// <summary>
     /// Represents a generic player manager
@@ -25,11 +24,12 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         private IDictionary<string, PlayerRecord> playerData;
         private IDictionary<string, ReignOfKingsPlayer> allPlayers;
         private IDictionary<string, ReignOfKingsPlayer> connectedPlayers;
+        private const string dataFileName = "umod";
 
         internal void Initialize()
         {
-            Utility.DatafileToProto<Dictionary<string, PlayerRecord>>("oxide.covalence");
-            playerData = ProtoStorage.Load<Dictionary<string, PlayerRecord>>("oxide.covalence") ?? new Dictionary<string, PlayerRecord>();
+            // TODO: Migrate/move from oxide.universal.data to umod.data if SQLite is not used, else migrate to umod.db with SQLite
+            playerData = ProtoStorage.Load<Dictionary<string, PlayerRecord>>(dataFileName) ?? new Dictionary<string, PlayerRecord>();
             allPlayers = new Dictionary<string, ReignOfKingsPlayer>();
             connectedPlayers = new Dictionary<string, ReignOfKingsPlayer>();
 
@@ -43,8 +43,7 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         {
             string id = userId.ToString();
 
-            PlayerRecord record;
-            if (playerData.TryGetValue(id, out record))
+            if (playerData.TryGetValue(id, out PlayerRecord record))
             {
                 record.Name = name;
                 playerData[id] = record;
@@ -67,7 +66,7 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
 
         internal void PlayerDisconnected(Player player) => connectedPlayers.Remove(player.Id.ToString());
 
-        internal void SavePlayerData() => ProtoStorage.Save(playerData, "oxide.covalence");
+        internal void SavePlayerData() => ProtoStorage.Save(playerData, dataFileName);
 
         #region Player Finding
 
@@ -96,8 +95,7 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// <returns></returns>
         public IPlayer FindPlayerById(string id)
         {
-            ReignOfKingsPlayer player;
-            return allPlayers.TryGetValue(id, out player) ? player : null;
+            return allPlayers.TryGetValue(id, out ReignOfKingsPlayer player) ? player : null;
         }
 
         /// <summary>

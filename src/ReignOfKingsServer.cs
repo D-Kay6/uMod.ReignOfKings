@@ -3,13 +3,13 @@ using CodeHatch.Engine.Core.Commands;
 using CodeHatch.Engine.Networking;
 using CodeHatch.Networking.Events;
 using CodeHatch.Networking.Events.WorldEvents.TimeEvents;
-using Oxide.Core;
-using Oxide.Core.Libraries.Covalence;
 using System;
 using System.Globalization;
 using System.Net;
+using uMod.Libraries.Universal;
+using uMod.Logging;
 
-namespace Oxide.Game.ReignOfKings.Libraries.Covalence
+namespace uMod.ReignOfKings
 {
     /// <summary>
     /// Represents the server hosting the game instance
@@ -23,8 +23,8 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// </summary>
         public string Name
         {
-            get { return DedicatedServerBypass.Settings.ServerName; }
-            set { DedicatedServerBypass.Settings.ServerName = value; }
+            get => DedicatedServerBypass.Settings.ServerName;
+            set => DedicatedServerBypass.Settings.ServerName = value;
         }
 
         private static IPAddress address;
@@ -105,8 +105,8 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// </summary>
         public int MaxPlayers
         {
-            get { return Server.PlayerLimit; }
-            set { Server.PlayerLimit = value; }
+            get => Server.PlayerLimit;
+            set => Server.PlayerLimit = value;
         }
 
         /// <summary>
@@ -114,8 +114,8 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// </summary>
         public DateTime Time
         {
-            get { return DateTime.Today.AddHours(GameClock.Instance.TimeOfDay); }
-            set { EventManager.CallEvent(new TimeSetEvent(value.Hour, GameClock.Instance.DaySpeed)); }
+            get => DateTime.Today.AddHours(GameClock.Instance.TimeOfDay);
+            set => EventManager.CallEvent(new TimeSetEvent(value.Hour, GameClock.Instance.DaySpeed));
         }
 
         /// <summary>
@@ -190,14 +190,12 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// <param name="args"></param>
         public void Broadcast(string message, string prefix, params object[] args)
         {
-            if (string.IsNullOrEmpty(message))
+            if (!string.IsNullOrEmpty(message))
             {
-                return;
+                message = args.Length > 0 ? string.Format(Formatter.ToRoKAnd7DTD(message), args) : Formatter.ToRoKAnd7DTD(message);
+                string formatted = prefix != null ? $"{prefix} {message}" : message;
+                Server.BroadcastMessage(formatted);
             }
-
-            message = args.Length > 0 ? string.Format(Formatter.ToRoKAnd7DTD(message), args) : Formatter.ToRoKAnd7DTD(message);
-            string formatted = prefix != null ? $"{prefix} {message}" : message;
-            Server.BroadcastMessage(formatted);
         }
 
         /// <summary>

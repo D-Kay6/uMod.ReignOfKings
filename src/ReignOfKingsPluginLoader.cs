@@ -1,13 +1,13 @@
-﻿using Oxide.Core.Plugins;
-using System;
+﻿using System;
+using uMod.Plugins;
 
-namespace Oxide.Game.ReignOfKings
+namespace uMod.ReignOfKings
 {
     /// <summary>
-    /// Responsible for loading Reign of Kings core plugins
+    /// Responsible for loading the core Reign of Kings plugin
     /// </summary>
     public class ReignOfKingsPluginLoader : PluginLoader
     {
-        public override Type[] CorePlugins => new[] { typeof(ReignOfKingsCore) };
+        public override Type[] CorePlugins => new[] { typeof(ReignOfKings) };
     }
 }

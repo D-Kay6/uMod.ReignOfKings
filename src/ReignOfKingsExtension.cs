@@ -2,23 +2,23 @@
 using CodeHatch.Engine.Administration;
 using CodeHatch.Engine.Core.Commands;
 using CodeHatch.Engine.Networking;
-using Oxide.Core;
-using Oxide.Core.Extensions;
-using Oxide.Core.RemoteConsole;
-using Oxide.Game.ReignOfKings.Libraries;
-using Oxide.Plugins;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using uMod.Extensions;
+using uMod.Plugins;
+using uMod.Unity;
 using UnityEngine;
 
-namespace Oxide.Game.ReignOfKings
+namespace uMod.ReignOfKings
 {
     /// <summary>
     /// The extension class that represents this extension
     /// </summary>
     public class ReignOfKingsExtension : Extension
     {
+        // Get assembly info
         internal static Assembly Assembly = Assembly.GetExecutingAssembly();
         internal static AssemblyName AssemblyName = Assembly.GetName();
         internal static VersionNumber AssemblyVersion = new VersionNumber(AssemblyName.Version.Major, AssemblyName.Version.Minor, AssemblyName.Version.Build);
@@ -49,6 +49,12 @@ namespace Oxide.Game.ReignOfKings
         /// </summary>
         public override string Branch => "public"; // TODO: Handle this programmatically
 
+        // Commands that a plugin can't override
+        internal static IEnumerable<string> RestrictedCommands => new[]
+        {
+            ""
+        };
+
         /// <summary>
         /// Default game-specific references for use in plugins
         /// </summary>
@@ -62,7 +68,7 @@ namespace Oxide.Game.ReignOfKings
         /// </summary>
         public override string[] WhitelistAssemblies => new[]
         {
-            "Assembly-CSharp", "mscorlib", "Oxide.Core", "System", "System.Core", "UnityEngine"
+            "Assembly-CSharp", "mscorlib", "System", "System.Core", "uMod", "UnityEngine"
         };
 
         /// <summary>
@@ -171,7 +177,6 @@ namespace Oxide.Game.ReignOfKings
         /// </summary>
         public override void Load()
         {
-            Manager.RegisterLibrary("Command", new Command());
             Manager.RegisterPluginLoader(new ReignOfKingsPluginLoader());
         }
 
@@ -190,7 +195,7 @@ namespace Oxide.Game.ReignOfKings
         {
             CSharpPluginLoader.PluginReferences.UnionWith(DefaultReferences);
 
-            if (!Interface.Oxide.CheckConsole() || !Interface.Oxide.EnableConsole())
+            if (!Interface.uMod.CheckConsole() || !Interface.uMod.EnableConsole())
             {
                 return;
             }
@@ -213,52 +218,51 @@ namespace Oxide.Game.ReignOfKings
             {
                 if (type == LogType.Exception)
                 {
-                    Interface.Oxide.LogDebug(message + "\n" + stackTrace);
+                    Interface.uMod.LogDebug(message + "\n" + stackTrace);
                 }
             };
 
-            Interface.Oxide.ServerConsole.Input += ServerConsoleOnInput;
-            Interface.Oxide.ServerConsole.Completion = input =>
+            Interface.uMod.ServerConsole.Input += ServerConsoleOnInput;
+            Interface.uMod.ServerConsole.Completion = input =>
             {
-                if (string.IsNullOrEmpty(input))
+                if (!string.IsNullOrEmpty(input))
                 {
-                    return null;
+                    if (input.StartsWith("/"))
+                    {
+                        input = input.Remove(0, 1);
+                    }
+                    return CommandManager.RegisteredCommands.Keys.Where(c => c.StartsWith(input.ToLower())).ToArray();
                 }
 
-                if (input.StartsWith("/"))
-                {
-                    input = input.Remove(0, 1);
-                }
-
-                return CommandManager.RegisteredCommands.Keys.Where(c => c.StartsWith(input.ToLower())).ToArray();
+                return null;
             };
         }
 
         internal static void ServerConsole()
         {
-            if (Interface.Oxide.ServerConsole == null)
+            if (Interface.uMod.ServerConsole == null)
             {
                 return;
             }
 
-            Interface.Oxide.ServerConsole.Title = () => $"{Server.PlayerCount} | {DedicatedServerBypass.Settings.ServerName}";
+            Interface.uMod.ServerConsole.Title = () => $"{Server.PlayerCount} | {DedicatedServerBypass.Settings.ServerName}";
 
-            Interface.Oxide.ServerConsole.Status1Left = () => DedicatedServerBypass.Settings.ServerName;
-            Interface.Oxide.ServerConsole.Status1Right = () =>
+            Interface.uMod.ServerConsole.Status1Left = () => DedicatedServerBypass.Settings.ServerName;
+            Interface.uMod.ServerConsole.Status1Right = () =>
             {
                 TimeSpan time = TimeSpan.FromSeconds(Time.realtimeSinceStartup);
                 string uptime = $"{time.TotalHours:00}h{time.Minutes:00}m{time.Seconds:00}s".TrimStart(' ', 'd', 'h', 'm', 's', '0');
                 return $"{Mathf.RoundToInt(1f / Time.smoothDeltaTime)}fps, {uptime}";
             };
 
-            Interface.Oxide.ServerConsole.Status2Left = () =>
+            Interface.uMod.ServerConsole.Status2Left = () =>
             {
                 string players = $"{Server.PlayerCount}/{Server.PlayerLimit} players";
                 int sleepers = CodeHatch.StarForge.Sleeping.PlayerSleeperObject.AllSleeperObjects.Count;
                 int entities = CodeHatch.Engine.Core.Cache.Entity.GetAll().Count;
                 return $"{players}, {sleepers + (sleepers.Equals(1) ? " sleeper" : " sleepers")}, {entities + (entities.Equals(1) ? " entity" : " entities")}";
             };
-            Interface.Oxide.ServerConsole.Status2Right = () =>
+            Interface.uMod.ServerConsole.Status2Right = () =>
             {
                 if (uLink.NetworkTime.serverTime <= 0)
                 {
@@ -269,21 +273,19 @@ namespace Oxide.Game.ReignOfKings
                 double bytesSent = 0;
                 foreach (Player player in Server.AllPlayers)
                 {
-                    if (!player.Connection.IsConnected)
+                    if (player.Connection.IsConnected)
                     {
-                        continue;
+                        ConnectionStatistics statistics = player.Connection.Statistics;
+                        bytesReceived += statistics.BytesReceivedPerSecond;
+                        bytesSent += statistics.BytesSentPerSecond;
                     }
-
-                    ConnectionStatistics statistics = player.Connection.Statistics;
-                    bytesReceived += statistics.BytesReceivedPerSecond;
-                    bytesSent += statistics.BytesSentPerSecond;
                 }
                 return $"{Utility.FormatBytes(bytesReceived)}/s in, {Utility.FormatBytes(bytesSent)}/s out";
             };
 
-            Interface.Oxide.ServerConsole.Status3Left = () => $"{GameClock.Instance.TimeOfDayAsClockString()}, Weather: {Weather.Instance.CurrentWeather}";
-            Interface.Oxide.ServerConsole.Status3Right = () => $"Oxide.ReignOfKings {AssemblyVersion}";
-            Interface.Oxide.ServerConsole.Status3RightColor = ConsoleColor.Yellow;
+            Interface.uMod.ServerConsole.Status3Left = () => $"{GameClock.Instance.TimeOfDayAsClockString()}, Weather: {Weather.Instance.CurrentWeather}";
+            Interface.uMod.ServerConsole.Status3Right = () => $"uMod.ReignOfKings {AssemblyVersion}";
+            Interface.uMod.ServerConsole.Status3RightColor = ConsoleColor.Yellow;
         }
 
         private static void ServerConsoleOnInput(string input)
@@ -295,15 +297,13 @@ namespace Oxide.Game.ReignOfKings
             }
 
             Console.Messages.Clear();
-            if (!CommandManager.ExecuteCommand(Server.Instance.ServerPlayer.Id, input))
+            if (CommandManager.ExecuteCommand(Server.Instance.ServerPlayer.Id, input))
             {
-                return;
-            }
-
-            string output = Console.CurrentOutput.TrimEnd('\n', '\r');
-            if (!string.IsNullOrEmpty(output))
-            {
-                Interface.Oxide.ServerConsole.AddMessage(output);
+                string output = Console.CurrentOutput.TrimEnd('\n', '\r');
+                if (!string.IsNullOrEmpty(output))
+                {
+                    Interface.uMod.ServerConsole.AddMessage(output);
+                }
             }
         }
 
@@ -317,35 +317,12 @@ namespace Oxide.Game.ReignOfKings
             HandleLog(message, IDUtil.GetObjectIDString(context), LogType.Log);
         }
 
-        private static void HandleLog(string message, string stackTrace, LogType type)
+        private static void HandleLog(string message, string stackTrace, LogType logType)
         {
-            if (string.IsNullOrEmpty(message) || Filter.Any(message.Contains))
+            if (!string.IsNullOrEmpty(message) && !Filter.Any(message.Contains))
             {
-                return;
+                Interface.uMod.RootLogger.HandleMessage(message, stackTrace, logType.ToLogType());
             }
-
-            ConsoleColor color = ConsoleColor.Gray;
-            string remoteType = "generic";
-
-            if (type == LogType.Warning)
-            {
-                color = ConsoleColor.Yellow;
-                remoteType = "warning";
-            }
-            else if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
-            {
-                color = ConsoleColor.Red;
-                remoteType = "error";
-            }
-
-            Interface.Oxide.ServerConsole.AddMessage(message, color);
-            Interface.Oxide.RemoteConsole.SendMessage(new RemoteMessage
-            {
-                Message = message,
-                Identifier = 0,
-                Type = remoteType,
-                Stacktrace = stackTrace
-            });
         }
     }
 }

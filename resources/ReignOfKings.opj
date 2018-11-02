@@ -6,12 +6,12 @@
       "AssemblyName": "Assembly-CSharp.dll",
       "Hooks": [
         {
-          "Type": "InitOxide",
+          "Type": "InitMod",
           "Hook": {
             "InjectionIndex": 119,
-            "HookTypeName": "Initialize Oxide",
-            "Name": "InitOxide [internal]",
-            "HookName": "InitOxide",
+            "HookTypeName": "Initialize uMod",
+            "Name": "InitMod [internal]",
+            "HookName": "InitMod",
             "AssemblyName": "Assembly-CSharp.dll",
             "TypeName": "CodeHatch.Engine.Administration.SocketAdminConsole",
             "Flagged": false,
@@ -1520,7 +1520,7 @@
           "Name": "IPlayer",
           "AssemblyName": "Assembly-CSharp.dll",
           "TypeName": "CodeHatch.Engine.Networking.Player",
-          "FieldType": "Oxide.Core|Oxide.Core.Libraries.Covalence.IPlayer",
+          "FieldType": "uMod|uMod.Libraries.Universal.IPlayer",
           "Flagged": false
         }
       ]

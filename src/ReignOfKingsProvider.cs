@@ -1,11 +1,11 @@
-﻿using Oxide.Core.Libraries.Covalence;
+﻿using uMod.Libraries.Universal;
 
-namespace Oxide.Game.ReignOfKings.Libraries.Covalence
+namespace uMod.ReignOfKings
 {
     /// <summary>
-    /// Provides Covalence functionality for the game "Reign of Kings"
+    /// Provides Universal functionality for the game "Reign of Kings"
     /// </summary>
-    public class ReignOfKingsCovalenceProvider : ICovalenceProvider
+    public class ReignOfKingsProvider : IUniversalProvider
     {
         /// <summary>
         /// Gets the name of the game for which this provider provides
@@ -25,9 +25,9 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// <summary>
         /// Gets the singleton instance of this provider
         /// </summary>
-        internal static ReignOfKingsCovalenceProvider Instance { get; private set; }
+        internal static ReignOfKingsProvider Instance { get; private set; }
 
-        public ReignOfKingsCovalenceProvider()
+        public ReignOfKingsProvider()
         {
             Instance = this;
         }
@@ -40,7 +40,7 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// <summary>
         /// Gets the command system provider
         /// </summary>
-        public ReignOfKingsCommandSystem CommandSystem { get; private set; }
+        public ReignOfKingsCommands CommandSystem { get; private set; }
 
         /// <summary>
         /// Creates the game-specific server object
@@ -63,10 +63,10 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// Creates the game-specific command system provider object
         /// </summary>
         /// <returns></returns>
-        public ICommandSystem CreateCommandSystemProvider() => CommandSystem = new ReignOfKingsCommandSystem();
+        public ICommandSystem CreateCommandSystemProvider() => CommandSystem = new ReignOfKingsCommands();
 
         /// <summary>
-        /// Formats the text with markup as specified in Oxide.Core.Libraries.Covalence.Formatter
+        /// Formats the text with markup as specified in uMod.Libraries.Formatter
         /// into the game-specific markup language
         /// </summary>
         /// <param name="text">text to format</param>

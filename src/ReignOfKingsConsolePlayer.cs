@@ -1,11 +1,10 @@
 ﻿using CodeHatch.Engine.Core.Commands;
 using CodeHatch.Engine.Networking;
-using Oxide.Core;
-using Oxide.Core.Libraries.Covalence;
 using System;
 using System.Globalization;
+using uMod.Libraries.Universal;
 
-namespace Oxide.Game.ReignOfKings.Libraries.Covalence
+namespace uMod.ReignOfKings
 {
     /// <summary>
     /// Represents the player, either connected or not
@@ -138,8 +137,7 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         public float MaxHealth { get; set; }
 
         /// <summary>
-        /// Renames the player to specified name
-        /// <param name="name"></param>
+        /// Renames the player to specified name <param name="name"></param>
         /// </summary>
         public void Rename(string name)
         {
@@ -205,7 +203,7 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         {
             message = args.Length > 0 ? string.Format(Formatter.ToPlaintext(message), args) : Formatter.ToPlaintext(message);
             string formatted = prefix != null ? $"{prefix} {message}" : message;
-            Interface.Oxide.LogInfo(formatted);
+            Interface.uMod.LogInfo(formatted);
         }
 
         /// <summary>

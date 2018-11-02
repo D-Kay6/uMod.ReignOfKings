@@ -6,14 +6,13 @@ using CodeHatch.Engine.Networking;
 using CodeHatch.Networking.Events;
 using CodeHatch.Networking.Events.Entities;
 using CodeHatch.StarForge.Sleeping;
-using Oxide.Core;
-using Oxide.Core.Libraries;
-using Oxide.Core.Libraries.Covalence;
 using System;
 using System.Globalization;
+using uMod.Libraries;
+using uMod.Libraries.Universal;
 using UnityEngine;
 
-namespace Oxide.Game.ReignOfKings.Libraries.Covalence
+namespace uMod.ReignOfKings
 {
     /// <summary>
     /// Represents a player, either connected or not
@@ -28,7 +27,7 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         {
             if (libPerms == null)
             {
-                libPerms = Interface.Oxide.GetLibrary<Permission>();
+                libPerms = Interface.uMod.GetLibrary<Permission>();
             }
 
             Name = name.Sanitize();
@@ -126,13 +125,11 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         public void Ban(string reason, TimeSpan duration = default(TimeSpan))
         {
             // Check if already banned
-            if (IsBanned)
+            if (!IsBanned)
             {
-                return;
+                // Ban and kick user
+                Server.Ban(steamId, (int)duration.TotalSeconds, reason);
             }
-
-            // Ban and kick user
-            Server.Ban(steamId, (int)duration.TotalSeconds, reason);
         }
 
         /// <summary>
@@ -151,8 +148,8 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// </summary>
         public float Health
         {
-            get { return player.GetHealth().CurrentHealth; }
-            set { player.GetHealth().CurrentHealth = value; }
+            get => player.GetHealth().CurrentHealth;
+            set => player.GetHealth().CurrentHealth = value;
         }
 
         /// <summary>
@@ -186,13 +183,12 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// </summary>
         public float MaxHealth
         {
-            get { return player.GetHealth().MaxHealth; }
-            set { player.GetHealth().MaxHealth = value; }
+            get => player.GetHealth().MaxHealth;
+            set => player.GetHealth().MaxHealth = value;
         }
 
         /// <summary>
-        /// Renames the player to specified name
-        /// <param name="name"></param>
+        /// Renames the player to specified name <param name="name"></param>
         /// </summary>
         public void Rename(string name) => player.CurrentCharacter.ChangeName(name);
 
@@ -219,13 +215,11 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         public void Unban()
         {
             // Check if unbanned already
-            if (!IsBanned)
+            if (IsBanned)
             {
-                return;
+                // Set to unbanned
+                Server.Unban(steamId);
             }
-
-            // Set to unbanned
-            Server.Unban(steamId);
         }
 
         #endregion Administration
@@ -268,14 +262,12 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// <param name="args"></param>
         public void Message(string message, string prefix, params object[] args)
         {
-            if (string.IsNullOrEmpty(message))
+            if (!string.IsNullOrEmpty(message))
             {
-                return;
+                message = args.Length > 0 ? string.Format(Formatter.ToRoKAnd7DTD(message), args) : Formatter.ToRoKAnd7DTD(message);
+                string formatted = prefix != null ? $"{prefix} {message}" : message;
+                player.SendMessage(formatted);
             }
-
-            message = args.Length > 0 ? string.Format(Formatter.ToRoKAnd7DTD(message), args) : Formatter.ToRoKAnd7DTD(message);
-            string formatted = prefix != null ? $"{prefix} {message}" : message;
-            player.SendMessage(formatted);
         }
 
         /// <summary>
@@ -378,7 +370,7 @@ namespace Oxide.Game.ReignOfKings.Libraries.Covalence
         /// Returns a human readable string representation of this IPlayer
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => $"Covalence.ReignOfKingsPlayer[{Id}, {Name}]";
+        public override string ToString() => $"ReignOfKingsPlayer[{Id}, {Name}]";
 
         #endregion Operator Overloads
     }
